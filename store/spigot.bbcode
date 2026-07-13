@@ -1,0 +1,64 @@
+[center][size=6][b]RealyEasyVanish[/b][/size]
+[size=3]A fast, cross-platform vanish plugin for Paper, Spigot, Folia and Velocity — one single jar.[/size][/center]
+
+[hr]
+
+[size=4][b]Why RealyEasyVanish?[/b][/size]
+[list]
+[*][b]Real Folia support[/b] — no [i]BukkitRunnable[/i], no "called from wrong thread" errors. Every action tied to a specific player (teleport, gamemode, packets) runs on that player's own region via the Folia region/entity schedulers. Falls back cleanly to the classic scheduler on plain Paper/Spigot.
+[*][b]Proxy-wide sync[/b] — running a Velocity network? Vanish state follows a player across every backend server, pushed the moment they connect, so nobody ever sees a vanished player "flicker" into visibility.
+[*][b]One single jar[/b] — the same download works as a Bukkit-family plugin (Paper/Spigot/Folia) [i]and[/i] as a Velocity plugin. Each platform only reads its own manifest bundled inside the jar.
+[*][b]PlaceholderAPI expansion[/b] included, soft-depend — no error if PAPI isn't installed.
+[/list]
+
+[hr]
+
+[size=4][b]Commands[/b][/size]
+[list]
+[*][color=#55FF55]/vanish [player][/color] (alias [color=#55FF55]/v[/color]) — toggle vanish for yourself or another player
+[*][color=#55FF55]/vlist[/color] — clickable, interactive list of vanished players
+[*][color=#55FF55]/vchat[/color] — toggle chat-confirm (block your own messages while vanished), configurable
+[*][color=#55FF55]/vreload[/color] — reload the configuration
+[*][color=#55FF55]/vfollow <player|stop>[/color] — silently lock your camera onto a player
+[*][color=#55FF55]/vspec <player|stop>[/color] — instant spectator mode on a target
+[*][color=#55FF55]/isvanish <player>[/color] — check whether a player is vanished
+[*][color=#55FF55]/vscoreboard[/color] — toggle a sidebar listing vanished players
+[/list]
+
+[hr]
+
+[size=4][b]Placeholders (PlaceholderAPI)[/b][/size]
+[list]
+[*][color=#FFAA00]%revanish_is_vanished%[/color] — Yes / No
+[*][color=#FFAA00]%revanish_is_vanished_bool%[/color] — true / false
+[*][color=#FFAA00]%revanish_vanished_count%[/color] — number of vanished players
+[*][color=#FFAA00]%revanish_visible_online%[/color] — number of visible players
+[*][color=#FFAA00]%revanish_prefix%[/color] — configurable vanish prefix
+[*][color=#FFAA00]%revanish_pickup%[/color] — item pickup status while vanished
+[*][color=#FFAA00]%revanish_vanished_list%[/color] — comma-separated vanished names
+[*][color=#FFAA00]%revanish_visible_player_list%[/color] — comma-separated visible names
+[/list]
+
+[hr]
+
+[size=4][b]Requirements[/b][/size]
+[list]
+[*]Java 25+
+[*]Minecraft 1.26.2 — Paper, Spigot or Folia
+[*]Velocity (optional, for proxy-wide sync)
+[*]PlaceholderAPI (optional, for placeholders)
+[/list]
+
+[hr]
+
+[size=4][b]Permissions[/b][/size]
+[list]
+[*][color=#AAAAAA]revanish.vanish[/color] — use /vanish on yourself
+[*][color=#AAAAAA]revanish.vanish.others[/color] — use /vanish on another player
+[*][color=#AAAAAA]revanish.vlist[/color] · [color=#AAAAAA]revanish.vchat[/color] · [color=#AAAAAA]revanish.vreload[/color] · [color=#AAAAAA]revanish.vfollow[/color] · [color=#AAAAAA]revanish.vspec[/color] · [color=#AAAAAA]revanish.isvanish[/color] · [color=#AAAAAA]revanish.vscoreboard[/color]
+[*][color=#AAAAAA]revanish.see[/color] — bypass vanish, see vanished players
+[/list]
+
+[hr]
+
+[center][i]Source code, issue tracker and build instructions are available on the linked GitHub repository.[/i][/center]
