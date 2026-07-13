@@ -28,8 +28,8 @@ A fast, cross-platform vanish plugin for **Paper**, **Spigot**, **Folia** and **
 
 | Platform | Support |
 |---|---|
-| Paper 1.26.2 | ✅ |
-| Spigot 1.26.2 | ✅ |
+| Paper 26.2 | ✅ |
+| Spigot 26.2 | ✅ |
 | Folia | ✅ native region scheduling |
 | Velocity | ✅ proxy-wide state sync |
 

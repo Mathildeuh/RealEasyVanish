@@ -38,7 +38,7 @@ A fast, cross-platform vanish plugin built for **Paper**, **Spigot**, **Folia** 
 ## Requirements
 
 - Java 25+
-- Minecraft 1.26.2 (Paper / Spigot / Folia) or a compatible Velocity proxy build
+- Minecraft 26.2 (Paper / Spigot / Folia) or a compatible Velocity proxy build
 - PlaceholderAPI (optional, for placeholders)
 
 ## Permissions
