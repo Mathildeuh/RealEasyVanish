@@ -51,10 +51,13 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
     private PluginMessageSyncBridge syncBridge;
     private FollowService followService;
     private VScoreboardService scoreboardService;
+    private PlatformScheduler scheduler;
+    private boolean behindProxy;
+    private boolean confirmationCheckScheduled;
 
     @Override
     public void onEnable() {
-        PlatformScheduler scheduler = FoliaSupport.isFolia()
+        scheduler = FoliaSupport.isFolia()
                 ? new FoliaPlatformScheduler(this)
                 : new BukkitPlatformScheduler(this);
 
@@ -79,7 +82,11 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
             new ReVanishPlaceholderExpansion(this, vanishManager).register();
         }
 
-        warnIfBehindUnpairedProxy(scheduler);
+        behindProxy = ProxyDetection.isBehindProxy();
+        if (behindProxy) {
+            getLogger().warning("This server appears to be running behind a proxy (BungeeCord/Velocity forwarding is enabled).");
+            getLogger().warning("Install RealyEasyVanish on your proxy too so vanish state stays in sync across your network.");
+        }
 
         getLogger().info(FoliaSupport.isFolia()
                 ? "RealyEasyVanish enabled with the Folia region scheduler."
@@ -87,21 +94,22 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
     }
 
     /**
-     * Detected purely from spigot.yml / config/paper-global.yml, since a backend has no other way
-     * to know a proxy exists in front of it before any player ever connects through one.
+     * Called from PlayerJoinListener rather than on a fixed delay after onEnable: the HELLO packet
+     * (and thus any chance of a reply) can only be sent once a player is online to carry it, so
+     * checking on a timer from startup would false-positive whenever nobody joins within that
+     * window. Only ever scheduled once, on whichever join happens first.
      */
-    private void warnIfBehindUnpairedProxy(PlatformScheduler scheduler) {
-        if (!ProxyDetection.isBehindProxy()) {
+    public void onFirstPlayerJoinSyncCheck() {
+        if (!behindProxy || confirmationCheckScheduled) {
             return;
         }
-        getLogger().warning("This server appears to be running behind a proxy (BungeeCord/Velocity forwarding is enabled).");
-        getLogger().warning("Install RealyEasyVanish on your proxy too so vanish state stays in sync across your network.");
+        confirmationCheckScheduled = true;
         scheduler.runDelayedGlobal(() -> {
             if (!syncBridge.everReceivedAnything()) {
                 getLogger().warning("No sync packet has been received from the proxy yet - double-check that "
                         + "RealyEasyVanish is installed and enabled on your Velocity proxy.");
             }
-        }, 20L * 30);
+        }, 20L * 10);
     }
 
     @Override
@@ -116,7 +124,8 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
 
     private void registerListeners() {
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new PlayerJoinListener(vanishManager, platform, scoreboardService, syncBridge), this);
+        pm.registerEvents(new PlayerJoinListener(vanishManager, platform, scoreboardService, syncBridge,
+                this::onFirstPlayerJoinSyncCheck), this);
         pm.registerEvents(new PlayerQuitListener(followService, scoreboardService), this);
         pm.registerEvents(new ChatListener(vanishManager), this);
         pm.registerEvents(new ItemPickupListener(vanishManager), this);

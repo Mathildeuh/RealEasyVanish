@@ -15,13 +15,16 @@ public final class PlayerJoinListener implements Listener {
     private final BukkitVanishPlatform platform;
     private final VScoreboardService scoreboardService;
     private final PluginMessageSyncBridge syncBridge;
+    private final Runnable onFirstJoin;
 
     public PlayerJoinListener(VanishManager vanishManager, BukkitVanishPlatform platform,
-                               VScoreboardService scoreboardService, PluginMessageSyncBridge syncBridge) {
+                               VScoreboardService scoreboardService, PluginMessageSyncBridge syncBridge,
+                               Runnable onFirstJoin) {
         this.vanishManager = vanishManager;
         this.platform = platform;
         this.scoreboardService = scoreboardService;
         this.syncBridge = syncBridge;
+        this.onFirstJoin = onFirstJoin;
     }
 
     @EventHandler
@@ -30,5 +33,6 @@ public final class PlayerJoinListener implements Listener {
         vanishManager.applyVisibilityToJoiner(platform.wrap(player));
         scoreboardService.onJoin(player);
         syncBridge.announcePresenceOnce(vanishManager.config().serverName());
+        onFirstJoin.run();
     }
 }
