@@ -60,7 +60,7 @@ jobs:
             folia
             velocity
           game-versions: |
-            1.26.2
+            26.2
           java: |
             25
 
