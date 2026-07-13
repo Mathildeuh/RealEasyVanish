@@ -3,14 +3,19 @@ package fr.mathilde.realyEasyVanish.bukkit;
 import fr.mathilde.realyEasyVanish.api.PlatformScheduler;
 import fr.mathilde.realyEasyVanish.api.ReVanishCommandSource;
 import fr.mathilde.realyEasyVanish.bukkit.command.BukkitCommandExecutor;
+import fr.mathilde.realyEasyVanish.bukkit.command.VanillaListCommand;
 import fr.mathilde.realyEasyVanish.bukkit.config.BukkitConfigStore;
 import fr.mathilde.realyEasyVanish.bukkit.follow.FollowService;
 import fr.mathilde.realyEasyVanish.bukkit.listener.ChatListener;
 import fr.mathilde.realyEasyVanish.bukkit.listener.ItemPickupListener;
 import fr.mathilde.realyEasyVanish.bukkit.listener.PlayerJoinListener;
 import fr.mathilde.realyEasyVanish.bukkit.listener.PlayerQuitListener;
+import fr.mathilde.realyEasyVanish.bukkit.ping.BasicPingListener;
+import fr.mathilde.realyEasyVanish.bukkit.ping.PaperPingListener;
+import fr.mathilde.realyEasyVanish.bukkit.ping.PaperPingSupport;
 import fr.mathilde.realyEasyVanish.bukkit.placeholder.ReVanishPlaceholderExpansion;
 import fr.mathilde.realyEasyVanish.bukkit.platform.BukkitVanishPlatform;
+import fr.mathilde.realyEasyVanish.bukkit.proxy.ProxyDetection;
 import fr.mathilde.realyEasyVanish.bukkit.scheduler.BukkitPlatformScheduler;
 import fr.mathilde.realyEasyVanish.bukkit.scheduler.FoliaPlatformScheduler;
 import fr.mathilde.realyEasyVanish.bukkit.scheduler.FoliaSupport;
@@ -68,14 +73,35 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
 
         registerListeners();
         registerCommands();
+        registerListCommand();
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new ReVanishPlaceholderExpansion(this, vanishManager).register();
         }
 
+        warnIfBehindUnpairedProxy(scheduler);
+
         getLogger().info(FoliaSupport.isFolia()
                 ? "RealyEasyVanish enabled with the Folia region scheduler."
                 : "RealyEasyVanish enabled with the classic Bukkit scheduler.");
+    }
+
+    /**
+     * Detected purely from spigot.yml / config/paper-global.yml, since a backend has no other way
+     * to know a proxy exists in front of it before any player ever connects through one.
+     */
+    private void warnIfBehindUnpairedProxy(PlatformScheduler scheduler) {
+        if (!ProxyDetection.isBehindProxy()) {
+            return;
+        }
+        getLogger().warning("This server appears to be running behind a proxy (BungeeCord/Velocity forwarding is enabled).");
+        getLogger().warning("Install RealyEasyVanish on your proxy too so vanish state stays in sync across your network.");
+        scheduler.runDelayedGlobal(() -> {
+            if (!syncBridge.everReceivedAnything()) {
+                getLogger().warning("No sync packet has been received from the proxy yet - double-check that "
+                        + "RealyEasyVanish is installed and enabled on your Velocity proxy.");
+            }
+        }, 20L * 30);
     }
 
     @Override
@@ -90,10 +116,22 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
 
     private void registerListeners() {
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new PlayerJoinListener(vanishManager, platform, scoreboardService), this);
+        pm.registerEvents(new PlayerJoinListener(vanishManager, platform, scoreboardService, syncBridge), this);
         pm.registerEvents(new PlayerQuitListener(followService, scoreboardService), this);
         pm.registerEvents(new ChatListener(vanishManager), this);
         pm.registerEvents(new ItemPickupListener(vanishManager), this);
+        pm.registerEvents(PaperPingSupport.isAvailable()
+                ? new PaperPingListener(vanishManager)
+                : new BasicPingListener(vanishManager), this);
+    }
+
+    private void registerListCommand() {
+        PluginCommand listCommand = getCommand("list");
+        if (listCommand == null) {
+            getLogger().warning("Command not declared in plugin.yml: list");
+            return;
+        }
+        listCommand.setExecutor(new VanillaListCommand(vanishManager));
     }
 
     private void registerCommands() {

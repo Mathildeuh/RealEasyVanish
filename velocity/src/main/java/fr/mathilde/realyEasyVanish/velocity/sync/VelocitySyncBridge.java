@@ -3,6 +3,7 @@ package fr.mathilde.realyEasyVanish.velocity.sync;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -27,10 +28,20 @@ public final class VelocitySyncBridge implements SyncBridge {
 
     private final ProxyServer proxyServer;
     private final List<Consumer<VanishSyncEvent>> handlers = new CopyOnWriteArrayList<>();
+    private final List<Consumer<String>> serverConfirmedHandlers = new CopyOnWriteArrayList<>();
 
     public VelocitySyncBridge(ProxyServer proxyServer) {
         this.proxyServer = proxyServer;
         proxyServer.getChannelRegistrar().register(CHANNEL);
+    }
+
+    /**
+     * Fired for the actual backend a message physically came through (resolved from the Velocity
+     * connection itself, not the packet's self-reported server name), for any packet type -
+     * including HELLO, so an installed-but-idle backend still gets confirmed quickly.
+     */
+    public void onServerConfirmed(Consumer<String> handler) {
+        serverConfirmedHandlers.add(handler);
     }
 
     @Override
@@ -55,6 +66,12 @@ public final class VelocitySyncBridge implements SyncBridge {
             return;
         }
         event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (event.getSource() instanceof ServerConnection connection) {
+            String actualServerName = connection.getServerInfo().getName();
+            for (Consumer<String> handler : serverConfirmedHandlers) {
+                handler.accept(actualServerName);
+            }
+        }
         SyncProtocol.DecodedPacket packet = SyncProtocol.decode(event.getData());
         if (packet.type() != SyncPacketType.VANISH_UPDATE) {
             return;

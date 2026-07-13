@@ -39,6 +39,12 @@ public final class FoliaPlatformScheduler implements PlatformScheduler {
     }
 
     @Override
+    public SchedulerTask runDelayedGlobal(Runnable task, long delayTicks) {
+        ScheduledTask scheduled = Bukkit.getGlobalRegionScheduler().runDelayed(plugin, ignored -> task.run(), delayTicks);
+        return scheduled::cancel;
+    }
+
+    @Override
     public SchedulerTask runRepeatingGlobal(Runnable task, long periodTicks) {
         ScheduledTask scheduled = Bukkit.getGlobalRegionScheduler()
                 .runAtFixedRate(plugin, ignored -> task.run(), periodTicks, periodTicks);

@@ -40,6 +40,10 @@ commands:
     description: Toggle the vanished-players sidebar.
     usage: /vscoreboard
     permission: revanish.vscoreboard
+  list:
+    description: List online players, excluding vanished ones (shadows vanilla /list).
+    usage: /list
+    permission: revanish.list
 
 permissions:
   revanish.vanish:
@@ -60,5 +64,7 @@ permissions:
     default: op
   revanish.vscoreboard:
     default: op
+  revanish.list:
+    default: true
   revanish.see:
     default: op

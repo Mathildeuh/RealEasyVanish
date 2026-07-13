@@ -14,6 +14,8 @@ public interface PlatformScheduler {
 
     void runForPlayer(ReVanishPlayer player, Runnable task);
 
+    SchedulerTask runDelayedGlobal(Runnable task, long delayTicks);
+
     SchedulerTask runRepeatingGlobal(Runnable task, long periodTicks);
 
     SchedulerTask runRepeatingForPlayer(ReVanishPlayer player, Runnable task, long periodTicks);

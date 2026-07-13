@@ -38,6 +38,14 @@ public final class VelocityPlatformScheduler implements PlatformScheduler {
     }
 
     @Override
+    public SchedulerTask runDelayedGlobal(Runnable task, long delayTicks) {
+        ScheduledTask scheduled = proxyServer.getScheduler().buildTask(pluginInstance, task)
+                .delay(delayTicks * 50L, TimeUnit.MILLISECONDS)
+                .schedule();
+        return scheduled::cancel;
+    }
+
+    @Override
     public SchedulerTask runRepeatingGlobal(Runnable task, long periodTicks) {
         ScheduledTask scheduled = proxyServer.getScheduler().buildTask(pluginInstance, task)
                 .repeat(periodTicks * 50L, TimeUnit.MILLISECONDS)

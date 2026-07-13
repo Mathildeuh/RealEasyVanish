@@ -22,6 +22,8 @@ public final class PluginMessageSyncBridge implements SyncBridge, PluginMessageL
 
     private final Plugin plugin;
     private final List<Consumer<VanishSyncEvent>> handlers = new CopyOnWriteArrayList<>();
+    private volatile boolean receivedAnything;
+    private volatile boolean helloSent;
 
     public PluginMessageSyncBridge(Plugin plugin) {
         this.plugin = plugin;
@@ -42,17 +44,34 @@ public final class PluginMessageSyncBridge implements SyncBridge, PluginMessageL
         handlers.add(handler);
     }
 
+    /**
+     * Fired once, opportunistically, the first time a player is online to carry it: lets the
+     * proxy confirm this backend runs RealyEasyVanish even if nobody has ever vanished yet.
+     */
+    public void announcePresenceOnce(String serverName) {
+        if (helloSent) {
+            return;
+        }
+        helloSent = true;
+        send(SyncProtocol.encodeHello(serverName));
+    }
+
+    public boolean everReceivedAnything() {
+        return receivedAnything;
+    }
+
     @Override
     public void onPluginMessageReceived(String channel, Player receiver, byte[] message) {
         if (!SyncProtocol.CHANNEL.equals(channel)) {
             return;
         }
+        receivedAnything = true;
         SyncProtocol.DecodedPacket packet = SyncProtocol.decode(message);
         switch (packet.type()) {
             case VANISH_UPDATE -> dispatch(new VanishSyncEvent(packet.player(), packet.vanished(), packet.server()));
             case FULL_SYNC_RESPONSE -> packet.fullState().forEach((uuid, vanished) ->
                     dispatch(new VanishSyncEvent(uuid, vanished, packet.server())));
-            case FULL_SYNC_REQUEST -> { }
+            case FULL_SYNC_REQUEST, HELLO -> { }
         }
     }
 

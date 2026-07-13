@@ -34,6 +34,14 @@ public final class SyncProtocol {
         return write(SyncPacketType.FULL_SYNC_REQUEST, out -> out.writeUTF(targetServer));
     }
 
+    /**
+     * Sent once by a backend as soon as it has a player connection to carry it, purely so the
+     * proxy can confirm the plugin is installed there even if nobody has ever vanished yet.
+     */
+    public static byte[] encodeHello(String sourceServer) {
+        return write(SyncPacketType.HELLO, out -> out.writeUTF(sourceServer));
+    }
+
     public static byte[] encodeFullSyncResponse(Map<UUID, Boolean> vanishedStates, String sourceServer) {
         return write(SyncPacketType.FULL_SYNC_RESPONSE, out -> {
             out.writeUTF(sourceServer);
@@ -55,7 +63,7 @@ public final class SyncProtocol {
                     String server = in.readUTF();
                     yield new DecodedPacket(type, uuid, vanished, server, null);
                 }
-                case FULL_SYNC_REQUEST -> new DecodedPacket(type, null, false, in.readUTF(), null);
+                case FULL_SYNC_REQUEST, HELLO -> new DecodedPacket(type, null, false, in.readUTF(), null);
                 case FULL_SYNC_RESPONSE -> {
                     String server = in.readUTF();
                     int count = in.readInt();

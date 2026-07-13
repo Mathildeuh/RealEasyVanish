@@ -3,7 +3,8 @@ package fr.mathilde.realyEasyVanish.common.sync;
 public enum SyncPacketType {
     VANISH_UPDATE,
     FULL_SYNC_REQUEST,
-    FULL_SYNC_RESPONSE;
+    FULL_SYNC_RESPONSE,
+    HELLO;
 
     public static SyncPacketType fromId(byte id) {
         SyncPacketType[] values = values();

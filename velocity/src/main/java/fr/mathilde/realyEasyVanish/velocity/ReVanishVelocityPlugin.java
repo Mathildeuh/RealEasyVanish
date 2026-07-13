@@ -25,9 +25,12 @@ import fr.mathilde.realyEasyVanish.common.config.ReVanishConfig;
 import fr.mathilde.realyEasyVanish.common.sync.SyncProtocol;
 import fr.mathilde.realyEasyVanish.velocity.command.VelocitySimpleCommand;
 import fr.mathilde.realyEasyVanish.velocity.config.VelocityConfigStore;
+import fr.mathilde.realyEasyVanish.velocity.diagnostics.BackendCoverageService;
+import fr.mathilde.realyEasyVanish.velocity.ping.ProxyPingListener;
 import fr.mathilde.realyEasyVanish.velocity.platform.VelocityVanishPlatform;
 import fr.mathilde.realyEasyVanish.velocity.scheduler.VelocityPlatformScheduler;
 import fr.mathilde.realyEasyVanish.velocity.sync.VelocitySyncBridge;
+import org.slf4j.Logger;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -39,14 +42,16 @@ import java.util.UUID;
 public final class ReVanishVelocityPlugin {
 
     private final ProxyServer proxyServer;
+    private final Logger logger;
     private final Path dataDirectory;
 
     private VanishManager vanishManager;
     private VelocitySyncBridge syncBridge;
 
     @Inject
-    public ReVanishVelocityPlugin(ProxyServer proxyServer, @DataDirectory Path dataDirectory) {
+    public ReVanishVelocityPlugin(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
         this.proxyServer = proxyServer;
+        this.logger = logger;
         this.dataDirectory = dataDirectory;
     }
 
@@ -63,6 +68,8 @@ public final class ReVanishVelocityPlugin {
         vanishManager = new VanishManager(platform, config);
 
         registerCommands(platform, configManager);
+        proxyServer.getEventManager().register(this, new ProxyPingListener(vanishManager));
+        new BackendCoverageService(proxyServer, scheduler, logger, syncBridge);
     }
 
     private void registerCommands(VelocityVanishPlatform platform, ConfigManager configManager) {
