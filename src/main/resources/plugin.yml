@@ -1,0 +1,8 @@
+name: RealyEasyVanish
+version: '${version}'
+
+main: fr.mathilde.realyEasyVanish.RealyEasyVanish
+api-version: '26.2'
+load: POSTWORLD
+
+authors: [ Mathildeuh ]
