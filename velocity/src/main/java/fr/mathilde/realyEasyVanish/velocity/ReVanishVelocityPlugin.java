@@ -13,12 +13,8 @@ import fr.mathilde.realyEasyVanish.api.PlatformScheduler;
 import fr.mathilde.realyEasyVanish.common.VanishManager;
 import fr.mathilde.realyEasyVanish.common.command.IsVanishCommand;
 import fr.mathilde.realyEasyVanish.common.command.ReVanishCommand;
-import fr.mathilde.realyEasyVanish.common.command.VChatCommand;
-import fr.mathilde.realyEasyVanish.common.command.VFollowCommand;
 import fr.mathilde.realyEasyVanish.common.command.VListCommand;
 import fr.mathilde.realyEasyVanish.common.command.VReloadCommand;
-import fr.mathilde.realyEasyVanish.common.command.VScoreboardCommand;
-import fr.mathilde.realyEasyVanish.common.command.VSpecCommand;
 import fr.mathilde.realyEasyVanish.common.command.VanishCommand;
 import fr.mathilde.realyEasyVanish.common.config.ConfigManager;
 import fr.mathilde.realyEasyVanish.common.config.ReVanishConfig;
@@ -72,16 +68,19 @@ public final class ReVanishVelocityPlugin {
         new BackendCoverageService(proxyServer, scheduler, logger, syncBridge);
     }
 
+    /**
+     * Only commands with real network-wide meaning are registered here. /vchat, /vfollow, /vspec
+     * and /vscoreboard only matter on whichever backend the player is actually on: if we also
+     * registered them here, Velocity would intercept them before they ever reach that backend
+     * (proxy-registered commands always take priority), permanently breaking them for anyone
+     * connected through the proxy instead of just leaving them without proxy-level behavior.
+     */
     private void registerCommands(VelocityVanishPlatform platform, ConfigManager configManager) {
         List<ReVanishCommand> commands = List.of(
                 new VanishCommand(vanishManager, platform),
                 new VListCommand(vanishManager, platform),
-                new VChatCommand(vanishManager),
                 new VReloadCommand(vanishManager, configManager),
-                new VFollowCommand(vanishManager, platform),
-                new VSpecCommand(vanishManager, platform),
-                new IsVanishCommand(vanishManager, platform),
-                new VScoreboardCommand(vanishManager, platform)
+                new IsVanishCommand(vanishManager, platform)
         );
         CommandManager commandManager = proxyServer.getCommandManager();
         for (ReVanishCommand command : commands) {

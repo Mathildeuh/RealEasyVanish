@@ -45,7 +45,10 @@ public final class FollowService {
                 stopFollow(followerUuid);
                 return;
             }
-            self.teleport(target.getLocation());
+            // teleportAsync (not teleport): a Folia region schedules its own tasks synchronously,
+            // but the destination location may be owned by a different region's thread, which
+            // plain teleport() cannot safely cross.
+            self.teleportAsync(target.getLocation());
         }, vanishManager.config().followUpdateIntervalTicks());
         followTasks.put(followerUuid, task);
     }

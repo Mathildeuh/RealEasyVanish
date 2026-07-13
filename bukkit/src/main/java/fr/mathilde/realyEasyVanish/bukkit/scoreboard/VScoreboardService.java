@@ -20,8 +20,15 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Per-player sidebar, so updates run through PlatformScheduler#runRepeatingForPlayer (required on
  * Folia since sending packets tied to a specific player must happen on that player's region).
+ *
+ * Reuses whatever scoreboard the player already has (from another plugin, e.g. one that manages
+ * nametag teams) instead of replacing it outright, and on disable only removes our own objective -
+ * never resets the player back to the server's shared main scoreboard, which would permanently
+ * destroy anything another plugin had set up for them.
  */
 public final class VScoreboardService {
+
+    private static final String OBJECTIVE_NAME = "revanish";
 
     private final VanishManager vanishManager;
     private final BukkitVanishPlatform platform;
@@ -35,27 +42,39 @@ public final class VScoreboardService {
     }
 
     public void setEnabled(Player player, boolean enabled) {
-        stop(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        stop(uuid);
         if (!enabled) {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            Scoreboard board = player.getScoreboard();
+            Objective objective = board.getObjective(OBJECTIVE_NAME);
+            if (objective != null) {
+                objective.unregister();
+            }
             return;
         }
-        Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = board.registerNewObjective("revanish", Criteria.DUMMY, "Vanished players");
+
+        Scoreboard board = player.getScoreboard();
+        if (board == null || board.equals(Bukkit.getScoreboardManager().getMainScoreboard())) {
+            board = Bukkit.getScoreboardManager().getNewScoreboard();
+            player.setScoreboard(board);
+        }
+        Objective objective = board.getObjective(OBJECTIVE_NAME);
+        if (objective == null) {
+            objective = board.registerNewObjective(OBJECTIVE_NAME, Criteria.DUMMY, "Vanished players");
+        }
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        player.setScoreboard(board);
 
         ReVanishPlayer ref = platform.wrap(player);
-        UUID uuid = player.getUniqueId();
+        Objective finalObjective = objective;
         PlatformScheduler.SchedulerTask task = scheduler.runRepeatingForPlayer(ref,
-                () -> update(uuid, objective), vanishManager.config().scoreboardUpdateIntervalTicks());
+                () -> update(uuid, finalObjective), vanishManager.config().scoreboardUpdateIntervalTicks());
         tasks.put(uuid, task);
         update(uuid, objective);
     }
 
     private void update(UUID uuid, Objective objective) {
         Player player = Bukkit.getPlayer(uuid);
-        if (player == null || !player.isOnline()) {
+        if (player == null || !player.isOnline() || !objective.getScoreboard().equals(player.getScoreboard())) {
             return;
         }
         Scoreboard board = objective.getScoreboard();

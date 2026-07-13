@@ -87,15 +87,33 @@ public final class VanishManager implements PlaceholderSource {
     }
 
     public void applyVisibilityToJoiner(ReVanishPlayer joiner) {
-        if (joiner.hasPermission("revanish.see")) {
+        if (!joiner.hasPermission("revanish.see")) {
+            for (Map.Entry<UUID, VanishState> entry : states.entrySet()) {
+                if (!entry.getValue().vanished()) {
+                    continue;
+                }
+                platform.player(entry.getKey()).ifPresent(vanishedPlayer ->
+                        platform.scheduler().runForPlayer(joiner, () -> vanishedPlayer.hideFrom(joiner)));
+            }
+        }
+        reapplyVisibilityOnRejoin(joiner);
+    }
+
+    /**
+     * If this joiner was themselves already marked vanished (state persists in-memory across a
+     * disconnect/reconnect, e.g. a staff member's client crashing), re-hide them from everyone
+     * else currently online: nothing else re-applies that on rejoin, so without this a reconnect
+     * would silently make a "still vanished" player visible to the rest of the server.
+     */
+    private void reapplyVisibilityOnRejoin(ReVanishPlayer joiner) {
+        if (!isVanished(joiner.uuid())) {
             return;
         }
-        for (Map.Entry<UUID, VanishState> entry : states.entrySet()) {
-            if (!entry.getValue().vanished()) {
+        for (ReVanishPlayer viewer : platform.onlinePlayers()) {
+            if (viewer.uuid().equals(joiner.uuid()) || viewer.hasPermission("revanish.see")) {
                 continue;
             }
-            platform.player(entry.getKey()).ifPresent(vanishedPlayer ->
-                    platform.scheduler().runForPlayer(joiner, () -> vanishedPlayer.hideFrom(joiner)));
+            platform.scheduler().runForPlayer(viewer, () -> joiner.hideFrom(viewer));
         }
     }
 

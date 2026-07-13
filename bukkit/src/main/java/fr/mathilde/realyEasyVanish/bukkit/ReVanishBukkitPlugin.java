@@ -147,7 +147,7 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
         List<ReVanishCommand> commands = List.of(
                 new VanishCommand(vanishManager, platform),
                 new VListCommand(vanishManager, platform),
-                new VChatCommand(vanishManager),
+                new VChatCommand(vanishManager, platform),
                 new VReloadCommand(vanishManager, configManager),
                 new VFollowCommand(vanishManager, platform),
                 new VSpecCommand(vanishManager, platform),
