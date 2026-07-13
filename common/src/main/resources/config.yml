@@ -1,0 +1,15 @@
+# RealyEasyVanish configuration
+
+# Identifies this backend server in cross-server sync packets. Give each backend a unique
+# value matching its name in the proxy's configuration. Ignored on Velocity (always "proxy").
+server-name: "server"
+
+vanish-prefix: "&7[Vanish] &r"
+
+# Master switch for the /vchat "chatconfirm" module. When false, vanished players can always
+# talk normally regardless of their personal /vchat toggle.
+chat-confirm-enabled: true
+
+scoreboard-update-interval-ticks: 20
+
+follow-update-interval-ticks: 2

@@ -1,0 +1,64 @@
+name: RealyEasyVanish
+version: '${version}'
+main: fr.mathilde.realyEasyVanish.bukkit.ReVanishBukkitPlugin
+api-version: '26.2'
+load: POSTWORLD
+authors: [ Mathildeuh ]
+softdepend: [ PlaceholderAPI ]
+
+commands:
+  vanish:
+    description: Toggle vanish for yourself or another player.
+    usage: /vanish [player]
+    aliases: [ v ]
+    permission: revanish.vanish
+  vlist:
+    description: List currently vanished players.
+    usage: /vlist
+    permission: revanish.vlist
+  vchat:
+    description: Toggle whether your chat messages are blocked while vanished.
+    usage: /vchat
+    permission: revanish.vchat
+  vreload:
+    description: Reload the RealyEasyVanish configuration.
+    usage: /vreload
+    permission: revanish.vreload
+  vfollow:
+    description: Silently lock your camera onto a player.
+    usage: /vfollow <player|stop>
+    permission: revanish.vfollow
+  vspec:
+    description: Quickly enter spectator mode on a player.
+    usage: /vspec <player|stop>
+    permission: revanish.vspec
+  isvanish:
+    description: Check whether a player is vanished.
+    usage: /isvanish <player>
+    permission: revanish.isvanish
+  vscoreboard:
+    description: Toggle the vanished-players sidebar.
+    usage: /vscoreboard
+    permission: revanish.vscoreboard
+
+permissions:
+  revanish.vanish:
+    default: op
+  revanish.vanish.others:
+    default: op
+  revanish.vlist:
+    default: op
+  revanish.vchat:
+    default: true
+  revanish.vreload:
+    default: op
+  revanish.vfollow:
+    default: op
+  revanish.vspec:
+    default: op
+  revanish.isvanish:
+    default: op
+  revanish.vscoreboard:
+    default: op
+  revanish.see:
+    default: op

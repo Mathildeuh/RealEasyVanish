@@ -1,0 +1,8 @@
+{
+  "id": "revanish",
+  "name": "RealyEasyVanish",
+  "version": "${version}",
+  "description": "Cross-platform vanish plugin (Paper/Spigot/Folia/Velocity).",
+  "authors": [ "Mathildeuh" ],
+  "main": "fr.mathilde.realyEasyVanish.velocity.ReVanishVelocityPlugin"
+}
