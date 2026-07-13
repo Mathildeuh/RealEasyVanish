@@ -1,0 +1,74 @@
+name: Release
+
+# Push a tag like "v1.0.0" to trigger a build + GitHub release + (optional) store publishing.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build shaded jar
+        run: ./gradlew build -Pversion=${{ steps.version.outputs.version }}
+
+      - name: Locate jar
+        id: jar
+        run: echo "path=$(ls plugin/build/libs/RealyEasyVanish-*.jar)" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.jar.outputs.path }}
+          generate_release_notes: true
+
+      # Optional: also publish to Modrinth / CurseForge / Hangar in the same action.
+      # Fill in the secrets below (repo Settings > Secrets and variables > Actions) once the
+      # projects exist on each platform; mc-publish silently skips any platform whose id/token
+      # is left empty, so this step is safe to keep even if you only use some of them.
+      - name: Publish to Modrinth / CurseForge / Hangar
+        uses: Kir-Antipov/mc-publish@v3.3
+        continue-on-error: true
+        with:
+          files: plugin/build/libs/RealyEasyVanish-*.jar
+          name: RealyEasyVanish ${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
+          version-type: release
+          loaders: |
+            paper
+            spigot
+            folia
+            velocity
+          game-versions: |
+            1.26.2
+          java: |
+            25
+
+          modrinth-id: ${{ secrets.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          hangar-id: ${{ secrets.HANGAR_PROJECT_SLUG }}
+          hangar-token: ${{ secrets.HANGAR_TOKEN }}
