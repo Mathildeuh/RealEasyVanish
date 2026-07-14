@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.mathilde.realyEasyVanish.api.PlatformScheduler;
+import fr.mathilde.realyEasyVanish.api.RealyEasyVanishAPI;
 import fr.mathilde.realyEasyVanish.common.VanishManager;
 import fr.mathilde.realyEasyVanish.common.command.IsVanishCommand;
 import fr.mathilde.realyEasyVanish.common.command.ReVanishCommand;
@@ -62,6 +63,7 @@ public final class ReVanishVelocityPlugin {
 
         VelocityVanishPlatform platform = new VelocityVanishPlatform(proxyServer, scheduler, syncBridge);
         vanishManager = new VanishManager(platform, config);
+        RealyEasyVanishAPI.register(vanishManager);
 
         registerCommands(platform, configManager);
         proxyServer.getEventManager().register(this, new ProxyPingListener(vanishManager));

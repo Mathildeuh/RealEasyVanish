@@ -1,6 +1,7 @@
 package fr.mathilde.realyEasyVanish.bukkit;
 
 import fr.mathilde.realyEasyVanish.api.PlatformScheduler;
+import fr.mathilde.realyEasyVanish.api.RealyEasyVanishAPI;
 import fr.mathilde.realyEasyVanish.api.ReVanishCommandSource;
 import fr.mathilde.realyEasyVanish.bukkit.command.BukkitCommandExecutor;
 import fr.mathilde.realyEasyVanish.bukkit.command.VanillaListCommand;
@@ -70,6 +71,7 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
 
         platform = new BukkitVanishPlatform(this, config.serverName(), scheduler, syncBridge);
         vanishManager = new VanishManager(platform, config);
+        RealyEasyVanishAPI.register(vanishManager);
 
         followService = new FollowService(vanishManager, platform);
         scoreboardService = new VScoreboardService(vanishManager, platform);
@@ -114,6 +116,9 @@ public final class ReVanishBukkitPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (vanishManager != null) {
+            RealyEasyVanishAPI.unregister(vanishManager);
+        }
         if (followService != null) {
             followService.shutdown();
         }
