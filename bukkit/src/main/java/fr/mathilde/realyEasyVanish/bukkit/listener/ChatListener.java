@@ -23,6 +23,7 @@ public final class ChatListener implements Listener {
         this.vanishManager = vanishManager;
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();

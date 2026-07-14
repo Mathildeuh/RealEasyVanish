@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +62,7 @@ public final class PluginMessageSyncBridge implements SyncBridge, PluginMessageL
     }
 
     @Override
-    public void onPluginMessageReceived(String channel, Player receiver, byte[] message) {
+    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player receiver, @NotNull byte[] message) {
         if (!SyncProtocol.CHANNEL.equals(channel)) {
             return;
         }

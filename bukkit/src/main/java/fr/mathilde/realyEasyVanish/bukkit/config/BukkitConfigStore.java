@@ -30,7 +30,10 @@ public final class BukkitConfigStore implements ConfigStore {
 
     @Override
     public OutputStream openWrite() throws IOException {
-        file.getParentFile().mkdirs();
+        File parent = file.getParentFile();
+        if (!parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) {
+            throw new IOException("Could not create directory: " + parent);
+        }
         return new FileOutputStream(file);
     }
 }

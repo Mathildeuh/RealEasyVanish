@@ -5,6 +5,8 @@ import fr.mathilde.realyEasyVanish.common.placeholder.PlaceholderResolver;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -19,18 +21,18 @@ public final class ReVanishPlaceholderExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String getIdentifier() {
+    public @NotNull String getIdentifier() {
         return "revanish";
     }
 
     @Override
-    public String getAuthor() {
+    public @NotNull String getAuthor() {
         return "Mathildeuh";
     }
 
     @Override
-    public String getVersion() {
-        return plugin.getDescription().getVersion();
+    public @NotNull String getVersion() {
+        return plugin.getPluginMeta().getVersion();
     }
 
     @Override
@@ -39,7 +41,7 @@ public final class ReVanishPlaceholderExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String onRequest(OfflinePlayer player, String params) {
+    public String onRequest(@Nullable OfflinePlayer player, @NotNull String params) {
         UUID uuid = player == null ? null : player.getUniqueId();
         return PlaceholderResolver.resolve(vanishManager, uuid, params);
     }

@@ -4,6 +4,7 @@ import fr.mathilde.realyEasyVanish.api.PlatformScheduler;
 import fr.mathilde.realyEasyVanish.api.ReVanishPlayer;
 import fr.mathilde.realyEasyVanish.bukkit.platform.BukkitVanishPlatform;
 import fr.mathilde.realyEasyVanish.common.VanishManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Criteria;
@@ -54,13 +55,13 @@ public final class VScoreboardService {
         }
 
         Scoreboard board = player.getScoreboard();
-        if (board == null || board.equals(Bukkit.getScoreboardManager().getMainScoreboard())) {
+        if (board.equals(Bukkit.getScoreboardManager().getMainScoreboard())) {
             board = Bukkit.getScoreboardManager().getNewScoreboard();
             player.setScoreboard(board);
         }
         Objective objective = board.getObjective(OBJECTIVE_NAME);
         if (objective == null) {
-            objective = board.registerNewObjective(OBJECTIVE_NAME, Criteria.DUMMY, "Vanished players");
+            objective = board.registerNewObjective(OBJECTIVE_NAME, Criteria.DUMMY, Component.text("Vanished players"));
         }
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
@@ -74,7 +75,7 @@ public final class VScoreboardService {
 
     private void update(UUID uuid, Objective objective) {
         Player player = Bukkit.getPlayer(uuid);
-        if (player == null || !player.isOnline() || !objective.getScoreboard().equals(player.getScoreboard())) {
+        if (player == null || !player.isOnline() || !player.getScoreboard().equals(objective.getScoreboard())) {
             return;
         }
         Scoreboard board = objective.getScoreboard();
